@@ -1,2 +1,2 @@
-# alexa-units-converter
-Alexa skill to convert units
+# alexa-unit-convert-skill
+Uses NodeJS lambda function
