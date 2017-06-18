@@ -34,7 +34,7 @@ var distanceUnits = ['millimeters', 'millimeters',
                     'light year', 'light years',
                     'meter', 'meters'];
 
-const handlers = {
+var handlers = {
     'LaunchRequest': function () {
         this.attributes.speechOutput = this.t('WELCOME_MESSAGE', this.t('SKILL_NAME'));
         // If the user either does not reply to the welcome message or says something that is not
@@ -43,61 +43,78 @@ const handlers = {
         this.emit(':ask', this.attributes.speechOutput, this.attributes.repromptSpeech);
     },
     'unitsConverter': function () {
-        const toUnitSlot = this.event.request.intent.slots.toUnit;
-        const fromUnitSlot = this.event.request.intent.slots.fromUnit;
-        const fromValueSlot = this.event.request.intent.slots.fromValue;
-        
-        let toUnit = toUnitSlot.value;
-        let fromUnit = fromUnitSlot.value;
-        let fromValue = fromValueSlot.value;
-        
-        if(distanceUnits.indexOf(fromUnit) > -1) {
-            var finalValueToConvert;
-            if(fromUnit == 'meter' || fromUnit == 'meters') {
-                finalValueToConvert = fromValue;
-            } else if(fromUnit == 'centimeter' || fromUnit == 'centimeters') {
-                finalValueToConvert = fromValue * 0.01;
-            }else if(fromUnit == 'millimeter' || fromUnit == 'millimeters') {
-                finalValueToConvert = fromValue * 0.001;
-            }else if(fromUnit == 'kilometer' || fromUnit == 'kilometers') {
-                finalValueToConvert = fromValue * 1000;
-            }else if(fromUnit == 'mile' || fromUnit == 'miles') {
-                finalValueToConvert = fromValue * 1609.34;
-            }else if(fromUnit == 'yard' || fromUnit == 'yards') {
-                finalValueToConvert = fromValue * 0.9144;
-            }else if(fromUnit == 'light year' || fromUnit == 'light years') {
-                finalValueToConvert = fromValue * 9.461e+15;
-            }
-            
-            console.log("From Value: " + finalValueToConvert);
-            console.log("From Unit: " + fromUnit);
-            
-            var outputVal;
-            if(toUnit == 'meter' || toUnit == 'meters') {
-                outputVal = finalValueToConvert;
-            } else if(toUnit == 'centimeter' || toUnit == 'centimeters') {
-                outputVal = finalValueToConvert * 100;
-            }else if(toUnit == 'millimeter' || toUnit == 'millimeters') {
-                outputVal = finalValueToConvert * 1000;
-            }else if(toUnit == 'kilometer' || toUnit == 'kilometers') {
-                outputVal = finalValueToConvert * 0.001;
-            }else if(toUnit == 'mile' || toUnit == 'miles') {
-                outputVal = finalValueToConvert * 0.000621371;
-            }else if(toUnit == 'yard' || toUnit == 'yards') {
-                outputVal = finalValueToConvert * 1.09361;
-            }else if(toUnit == 'light year' || toUnit == 'light years') {
-                outputVal = finalValueToConvert * 1.057e-16;
-            }
-            
-            console.log("To Unit: " + toUnit);
-            console.log("To Value: " + outputVal);
-            
-            this.attributes.speechOutput = outputVal + " " + toUnit.toString();
-            this.emit(':ask', this.attributes.speechOutput, this.t('WELCOME_REPROMT'));
+        if (this.event.request.dialogState === "STARTED") {
+            console.log("in Beginning");
+            var updatedIntent=this.event.request.intent;
+            //optionally pre-fill slots: update the intent object with slot values for which
+            //you have defaults, then return Dialog.Delegate with this updated intent
+            // in the updatedIntent property
+            this.emit(":delegate", updatedIntent);
+        } else if (this.event.request.dialogState !== "COMPLETED") {
+            console.log("in not completed");
+            // return a Dialog.Delegate directive with no updatedIntent property.
+            this.emit(":delegate");
         } else {
-            this.attributes.speechOutput = "Unit is not recognized. I have limitations";
-            this.emit(':ask', this.attributes.speechOutput, this.t('WELCOME_REPROMT'));
-        } 
+            console.log("in completed");
+            console.log("returning: "+ JSON.stringify(this.event.request.intent));
+           // Dialog is now complete and all required slots should be filled,
+           // so call your normal intent handler.
+            const toUnitSlot = this.event.request.intent.slots.toUnit;
+            const fromUnitSlot = this.event.request.intent.slots.fromUnit;
+            const fromValueSlot = this.event.request.intent.slots.fromValue;
+
+            let toUnit = toUnitSlot.value;
+            let fromUnit = fromUnitSlot.value;
+            let fromValue = fromValueSlot.value;
+
+            if(distanceUnits.indexOf(fromUnit) > -1) {
+                var finalValueToConvert;
+                if(fromUnit == 'meter' || fromUnit == 'meters') {
+                    finalValueToConvert = fromValue;
+                } else if(fromUnit == 'centimeter' || fromUnit == 'centimeters') {
+                    finalValueToConvert = fromValue * 0.01;
+                }else if(fromUnit == 'millimeter' || fromUnit == 'millimeters') {
+                    finalValueToConvert = fromValue * 0.001;
+                }else if(fromUnit == 'kilometer' || fromUnit == 'kilometers') {
+                    finalValueToConvert = fromValue * 1000;
+                }else if(fromUnit == 'mile' || fromUnit == 'miles') {
+                    finalValueToConvert = fromValue * 1609.34;
+                }else if(fromUnit == 'yard' || fromUnit == 'yards') {
+                    finalValueToConvert = fromValue * 0.9144;
+                }else if(fromUnit == 'light year' || fromUnit == 'light years') {
+                    finalValueToConvert = fromValue * 9.461e+15;
+                }
+
+                console.log("From Value: " + finalValueToConvert);
+                console.log("From Unit: " + fromUnit);
+
+                var outputVal;
+                if(toUnit == 'meter' || toUnit == 'meters') {
+                    outputVal = finalValueToConvert;
+                } else if(toUnit == 'centimeter' || toUnit == 'centimeters') {
+                    outputVal = finalValueToConvert * 100;
+                }else if(toUnit == 'millimeter' || toUnit == 'millimeters') {
+                    outputVal = finalValueToConvert * 1000;
+                }else if(toUnit == 'kilometer' || toUnit == 'kilometers') {
+                    outputVal = finalValueToConvert * 0.001;
+                }else if(toUnit == 'mile' || toUnit == 'miles') {
+                    outputVal = finalValueToConvert * 0.000621371;
+                }else if(toUnit == 'yard' || toUnit == 'yards') {
+                    outputVal = finalValueToConvert * 1.09361;
+                }else if(toUnit == 'light year' || toUnit == 'light years' || toUnit == 'light-years' || toUnit == 'light-year' ) {
+                    outputVal = finalValueToConvert * 1.057e-16;
+                }
+
+                console.log("To Unit: " + toUnit);
+                console.log("To Value: " + outputVal);
+
+                this.attributes.speechOutput = outputVal + " " + toUnit.toString();
+                this.emit(':tell', this.attributes.speechOutput, this.t('WELCOME_REPROMT'));
+            } else {
+                this.attributes.speechOutput = "Unit is not recognized. I have limitations";
+                this.emit(':ask', this.attributes.speechOutput, this.t('WELCOME_REPROMT'));
+            }
+        }
     },
     'AMAZON.HelpIntent': function () {
         this.attributes.speechOutput = this.t('HELP_MESSAGE');
@@ -105,14 +122,11 @@ const handlers = {
         this.emit(':ask', this.attributes.speechOutput, this.attributes.repromptSpeech);
     },
     'AMAZON.StopIntent': function () {
-        this.emit('SessionEndedRequest');
+        this.emit(':tell', this.t('STOP_MESSAGE'));
     },
     'AMAZON.CancelIntent': function () {
-        this.emit('SessionEndedRequest');
+         this.emit(':tell', this.t('STOP_MESSAGE'));
     },
-    'Unhandled': function () {
-        this.emit(':ask', this.t('WELCOME_MESSAGE'), this.t('WELCOME_REPROMT'));
-    }
 };
 
 exports.handler = function (event, context) {
@@ -123,3 +137,28 @@ exports.handler = function (event, context) {
     alexa.registerHandlers(handlers);
     alexa.execute();
 };
+
+// 3. Helper Function  =================================================================================================
+
+function delegateSlotCollection(){
+  console.log("in delegateSlotCollection");
+  console.log("current dialogState: "+this.event.request.dialogState);
+  if (this.event.request.dialogState === "STARTED") {
+    console.log("in Beginning");
+    var updatedIntent=this.event.request.intent;
+    //optionally pre-fill slots: update the intent object with slot values for which
+    //you have defaults, then return Dialog.Delegate with this updated intent
+    // in the updatedIntent property
+    this.emit(":delegate", updatedIntent);
+  } else if (this.event.request.dialogState !== "COMPLETED") {
+    console.log("in not completed");
+    // return a Dialog.Delegate directive with no updatedIntent property.
+    this.emit(":delegate");
+  } else {
+    console.log("in completed");
+    console.log("returning: "+ JSON.stringify(this.event.request.intent));
+    // Dialog is now complete and all required slots should be filled,
+    // so call your normal intent handler.
+    return this.event.request.intent;
+  }
+}
